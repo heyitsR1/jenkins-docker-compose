@@ -18,17 +18,18 @@ pipeline {
 
         stage('Clean Docker') {
             steps {
-                echo "Stopping and removing existing containers..."
-                sh 'docker-compose down || true' // ignore error if no containers running
-                echo "Pruning unused Docker data..."
-                sh 'docker system prune -af --volumes' // remove unused images, networks, build cache, and volumes
+                echo "Stopping old containers and pruning Docker..."
+                // Stop and remove any running containers defined in docker-compose
+                sh "${DOCKER_COMPOSE} down"
+                // Remove unused Docker data (images, containers, volumes)
+                sh 'docker system prune -af --volumes'
             }
         }
 
         stage('Build & Deploy') {
             steps {
-                echo "Building and running Docker containers..."
-                sh 'docker-compose up -d --build'
+                echo "Building and starting Docker containers..."
+                sh "${DOCKER_COMPOSE} up -d --build"
             }
         }
     }
